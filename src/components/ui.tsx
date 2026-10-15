@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { formatDateKey } from '../lib/dates'
 import { formatMoney } from '../lib/money'
 
 export function Spinner({ label = 'Loading…' }: { label?: string }) {
@@ -84,9 +85,36 @@ export function Money({ paise, colored = false, className = '' }: { paise: numbe
   return <span className={`tabular ${color} ${className}`}>{formatMoney(paise)}</span>
 }
 
-export function TotalsBar({ totalIn, totalOut }: { totalIn: number; totalOut: number }) {
+type Period = { opening: number; closing: number; from: string; to: string }
+
+export function TotalsBar({ totalIn, totalOut, period }: { totalIn: number; totalOut: number; period?: Period | null }) {
   return (
-    <div className="card grid grid-cols-3 divide-x divide-slate-200 text-center">
+    <div className="card overflow-hidden">
+      {period && (
+        <div className="flex items-center justify-between gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+          <span className="text-slate-600">
+            Opening balance <span className="text-xs text-slate-500">· before {formatDateKey(period.from)}</span>
+          </span>
+          <Money paise={period.opening} colored className="font-semibold" />
+        </div>
+      )}
+      <TotalsRow totalIn={totalIn} totalOut={totalOut} />
+      {period && (
+        <div className="flex items-center justify-between gap-2 border-t border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+          <span className="text-slate-600">
+            Closing balance{' '}
+            <span className="text-xs text-slate-500">· {period.to ? `end of ${formatDateKey(period.to)}` : 'today'}</span>
+          </span>
+          <Money paise={period.closing} colored className="font-semibold" />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TotalsRow({ totalIn, totalOut }: { totalIn: number; totalOut: number }) {
+  return (
+    <div className="grid grid-cols-3 divide-x divide-slate-200 text-center">
       <div className="px-1 py-3">
         <div className="text-xs text-slate-500">Total In</div>
         <Money paise={totalIn} className="text-sm font-semibold text-in sm:text-base" />

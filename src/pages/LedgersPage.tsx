@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { signOut, useUserId } from '../auth/AuthProvider'
+import { AboutModal } from '../components/AboutModal'
 import { ErrorBox, Modal, Money, PageHeader, Spinner } from '../components/ui'
 import { createLedger } from '../lib/api'
 import { formatDate } from '../lib/dates'
@@ -35,6 +36,7 @@ export function LedgersPage() {
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<Sort>(readSort)
   const [creating, setCreating] = useState(false)
+  const [aboutOpen, setAboutOpen] = useState(false)
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -46,9 +48,19 @@ export function LedgersPage() {
       <PageHeader
         title="ExpenseBook"
         actions={
-          <button className="btn-ghost px-2 py-1 text-xs" onClick={() => signOut()} title={me.data?.email}>
-            Sign out
-          </button>
+          <>
+            <button
+              className="btn-ghost size-9 rounded-full p-0 text-lg"
+              onClick={() => setAboutOpen(true)}
+              aria-label="About ExpenseBook"
+              title="About"
+            >
+              ⓘ
+            </button>
+            <button className="btn-ghost px-2 py-1 text-xs" onClick={() => signOut()} title={me.data?.email}>
+              Sign out
+            </button>
+          </>
         }
       />
       <main className="mx-auto max-w-3xl space-y-3 p-4 pb-28">
@@ -125,6 +137,7 @@ export function LedgersPage() {
       </div>
 
       <NewLedgerModal open={creating} onClose={() => setCreating(false)} />
+      <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
     </>
   )
 }

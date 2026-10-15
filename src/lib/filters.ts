@@ -85,3 +85,26 @@ export function totals(entries: { type: EntryType; amount: number }[]) {
   }
   return { totalIn, totalOut }
 }
+
+/**
+ * Ledger balance before and at the end of the filtered date range, like
+ * CashBook's "Opening Balance" when you pick dates. Uses every entry in the
+ * ledger, not just the filtered ones: it's the real balance on those days.
+ * Null when no start date is set (opening would always be ₹0).
+ * Entries must be oldest first.
+ */
+export function periodBalances(entries: EntryWithBalance[], f: Filters): { opening: number; closing: number } | null {
+  if (!f.from) return null
+  const fromTime = new Date(startOfDay(f.from)).getTime()
+  const toTime = f.to ? new Date(endOfDayExclusive(f.to)).getTime() : Infinity
+
+  let opening = 0
+  let closing = 0
+  for (const e of entries) {
+    const t = new Date(e.occurred_at).getTime()
+    if (t < fromTime) opening = e.balance
+    if (t < toTime) closing = e.balance
+    else break
+  }
+  return { opening, closing }
+}

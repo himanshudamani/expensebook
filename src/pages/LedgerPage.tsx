@@ -7,7 +7,7 @@ import { ErrorBox, Modal, Money, PageHeader, Spinner, TotalsBar } from '../compo
 import { deleteEntries, setEntriesCategory } from '../lib/api'
 import { formatDateKey, formatTime, toDateKey } from '../lib/dates'
 import { exportLedgerCsv } from '../lib/download'
-import { applyFilters, hasFilters, readFilters, totals, writeFilters, type Filters } from '../lib/filters'
+import { applyFilters, hasFilters, periodBalances, readFilters, totals, writeFilters, type Filters } from '../lib/filters'
 import { useCategories, useEntriesWithBalance, useInvalidateLedger, useLedger, useMembers } from '../lib/queries'
 import type { Entry, EntryType, EntryWithBalance } from '../lib/types'
 
@@ -48,6 +48,7 @@ export function LedgerPage() {
 
   const filtered = useMemo(() => applyFilters(entries.data ?? [], filters), [entries.data, filters])
   const { totalIn, totalOut } = useMemo(() => totals(filtered), [filtered])
+  const period = useMemo(() => periodBalances(entries.data ?? [], filters), [entries.data, filters])
 
   if (ledger.isPending) return <Spinner />
   if (ledger.error) return <ErrorBox error={ledger.error} />
@@ -105,7 +106,11 @@ export function LedgerPage() {
           categories={categories.data ?? []}
           members={members.data ?? []}
         />
-        <TotalsBar totalIn={totalIn} totalOut={totalOut} />
+        <TotalsBar
+          totalIn={totalIn}
+          totalOut={totalOut}
+          period={period && { ...period, from: filters.from, to: filters.to }}
+        />
         <ErrorBox error={entries.error} />
 
         {entries.isPending ? (

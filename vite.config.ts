@@ -8,6 +8,10 @@ export default defineConfig({
   // Relative base so the same build works at username.github.io/<repo>/ or a
   // custom domain. Routing uses the URL hash, so no server rewrites are needed.
   base: './',
+  define: {
+    // Shown in the About screen as "last updated".
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
+  },
   plugins: [
     react(),
     tailwindcss(),
